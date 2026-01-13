@@ -1,11 +1,1006 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Hello World By Domjeeling Cafe</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domjeeling Cafe | Nature's Best</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nature: {
+                            50: '#f7fcf5',
+                            100: '#ecf9eb',
+                            200: '#d5f0d1',
+                            300: '#b0e2aa',
+                            400: '#83cf7d',
+                            500: '#5ab352',
+                            600: '#43923d',
+                            700: '#367433',
+                            800: '#2e5c2d',
+                            900: '#274c27',
+                            950: '#112911',
+                        },
+                        earth: {
+                            100: '#f5f5f4', // warm gray
+                            800: '#44403c',
+                            900: '#292524',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Merriweather', 'serif'],
+                        sans: ['Nunito Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Nunito Sans', sans-serif; }
+        h1, h2, h3, .font-serif { font-family: 'Merriweather', serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #83cf7d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #43923d; }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #43923d;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Card Expansion Transition */
+        .details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .details-content.open {
+            max-height: 200px; /* Arbitrary large number */
+        }
+        
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+        }
+    </style>
 </head>
-<body>
+<body class="bg-nature-50 text-earth-800 min-h-screen flex flex-col bg-[url('https://images.unsplash.com/photo-1511497584788-876760111969?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-fixed bg-center">
+    
+    <!-- Background Overlay for readability -->
+    <div class="fixed inset-0 bg-nature-900/10 pointer-events-none z-0"></div>
 
-    <h1>Hello World By Domjeeling Cafe!</h1>
+    <!-- Notification Toast (Hidden by default) -->
+    <div id="toast" class="fixed top-4 right-4 z-50 transform transition-all duration-300 translate-x-full opacity-0">
+        <div class="bg-white border-l-4 border-nature-600 shadow-xl rounded-md p-4 flex items-center gap-3 min-w-[300px]">
+            <i class="fas fa-check-circle text-nature-600 text-xl"></i>
+            <div>
+                <h4 class="font-bold text-sm text-gray-800" id="toast-title">Success</h4>
+                <p class="text-xs text-gray-600" id="toast-message">Operation completed.</p>
+            </div>
+        </div>
+    </div>
 
+    <!-- Header & Navigation -->
+    <header class="glass-header shadow-sm sticky top-0 z-40 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-nature-600 rounded-tr-xl rounded-bl-xl flex items-center justify-center text-white shadow-md">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <span class="font-serif font-bold text-xl text-nature-900 tracking-tight">Domjeeling Cafe</span>
+                </div>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex space-x-8">
+                    <button onclick="switchTab('menu')" class="nav-btn text-nature-900 border-b-2 border-nature-600 px-1 pt-1 text-sm font-medium transition-colors" data-tab="menu">
+                        <i class="fas fa-utensils mr-2"></i>Menu
+                    </button>
+                    <button onclick="switchTab('ai')" class="nav-btn text-gray-500 border-transparent hover:text-nature-700 hover:border-gray-300 px-1 pt-1 border-b-2 text-sm font-medium transition-colors" data-tab="ai">
+                        <i class="fas fa-robot mr-2"></i>AI Kitchen
+                    </button>
+                    <button onclick="switchTab('admin')" class="nav-btn text-gray-500 border-transparent hover:text-nature-700 hover:border-gray-300 px-1 pt-1 border-b-2 text-sm font-medium transition-colors" data-tab="admin">
+                        <i class="fas fa-lock mr-2"></i>Admin
+                    </button>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button class="text-gray-500 hover:text-nature-900 p-2">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumbs -->
+    <div class="bg-nature-50/90 border-b border-nature-200 relative z-10 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div class="flex items-center text-xs text-nature-800">
+                <span class="opacity-60">Home</span>
+                <i class="fas fa-chevron-right mx-2 opacity-40"></i>
+                <span class="font-bold" id="breadcrumb-current">Menu</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full relative z-10">
+
+        <!-- VIEW: MENU -->
+        <section id="view-menu" class="space-y-6 fade-in">
+            <!-- Hero / Search -->
+            <div class="relative bg-nature-800 rounded-2xl p-8 text-white overflow-hidden shadow-2xl">
+                <div class="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1447933601403-0c60e017bc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center"></div>
+                <div class="relative z-10 text-center space-y-4">
+                    <h1 class="text-3xl md:text-4xl font-serif drop-shadow-md">Taste the Wild</h1>
+                    <!-- DYNAMIC ID ADDED HERE -->
+                    <p id="hero-desc" class="text-nature-100 max-w-2xl mx-auto drop-shadow-sm">Organic, locally sourced ingredients from the Domjeeling valley.</p>
+                    
+                    <div class="max-w-md mx-auto relative mt-6">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        <input type="text" id="menu-search" oninput="filterMenu()" placeholder="Search dishes, ingredients..." 
+                            class="w-full pl-10 pr-4 py-2.5 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-nature-400 shadow-xl bg-white/95">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="flex overflow-x-auto pb-2 gap-2 scrollbar-hide" id="category-filters">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Grid -->
+            <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- VIEW: AI KITCHEN -->
+        <section id="view-ai" class="hidden space-y-6 fade-in">
+            <div class="glass-panel p-6 rounded-2xl border border-purple-100 shadow-lg">
+                <div class="flex items-start gap-4">
+                    <div class="bg-purple-100 p-3 rounded-full text-purple-600">
+                        <i class="fas fa-sparkles text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-xl font-bold text-gray-800 mb-2">AI Menu Assistant</h2>
+                        <p class="text-sm text-gray-600 mb-4">Use our smart algorithms to analyze the menu or get recommendations.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Transform Pattern -->
+                            <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                <h3 class="font-bold text-sm mb-2"><i class="fas fa-magic mr-2 text-purple-500"></i>Currency Converter</h3>
+                                <p class="text-xs text-gray-500 mb-3">Convert INR prices to international currencies.</p>
+                                <div class="flex gap-2">
+                                    <button onclick="aiConvertCurrency('USD')" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg transition-colors">To USD ($)</button>
+                                    <button onclick="aiConvertCurrency('EUR')" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg transition-colors">To EUR (€)</button>
+                                    <button onclick="renderMenu()" class="text-xs text-gray-400 hover:text-gray-600 px-2">Reset</button>
+                                </div>
+                            </div>
+
+                            <!-- Summary Pattern -->
+                            <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                <h3 class="font-bold text-sm mb-2"><i class="fas fa-list-alt mr-2 text-blue-500"></i>Menu Summary</h3>
+                                <button onclick="aiSummarize()" id="btn-summary" class="w-full text-left text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg transition-colors flex justify-between items-center">
+                                    <span>Generate Flavor Profile</span>
+                                    <i class="fas fa-chevron-right text-xs"></i>
+                                </button>
+                                <div id="ai-summary-output" class="hidden mt-3 text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-200 leading-relaxed typing-effect"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inline Suggestions Demo -->
+            <div class="glass-panel p-6 rounded-2xl shadow-lg border border-gray-100">
+                <h3 class="font-bold text-lg mb-4">Smart Pairing</h3>
+                <div class="flex flex-col md:flex-row gap-6 items-center">
+                    <div class="w-full md:w-1/2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select a Drink</label>
+                        <select id="pairing-select" onchange="aiSuggestPairing()" class="w-full rounded-lg border-gray-300 bg-gray-50 p-2.5 text-sm focus:ring-2 focus:ring-nature-500 border">
+                            <option value="">-- Choose a beverage --</option>
+                            <option value="tea">Darjeeling First Flush</option>
+                            <option value="coffee">Himalayan Arabica</option>
+                            <option value="smoothie">Green Forest Smoothie</option>
+                        </select>
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <div id="pairing-result" class="h-full flex items-center justify-center p-4 bg-nature-50 rounded-xl border border-nature-100 text-center text-sm text-nature-800 min-h-[80px]">
+                            <span class="opacity-50 italic">Select a drink to see AI pairing suggestions...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: ADMIN -->
+        <section id="view-admin" class="hidden space-y-6 fade-in">
+            
+            <!-- Auth State: Locked -->
+            <div id="admin-locked" class="max-w-md mx-auto glass-panel p-8 rounded-2xl shadow-xl text-center mt-10">
+                <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-lock text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-serif mb-2">Restricted Access</h2>
+                <p class="text-gray-500 text-sm mb-6">Enter the administrative password to manage the menu.</p>
+                
+                <div class="relative">
+                    <input type="password" id="admin-password" placeholder="Enter password (try: nature2026)" 
+                        class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nature-500 focus:border-nature-500 outline-none transition-all">
+                    <button onclick="checkPassword()" class="absolute right-2 top-2 bottom-2 bg-nature-800 text-white px-4 rounded-md hover:bg-nature-900 transition-colors">
+                        Unlock
+                    </button>
+                </div>
+                <p id="login-error" class="text-red-500 text-xs mt-3 hidden"><i class="fas fa-exclamation-circle mr-1"></i> Incorrect password</p>
+            </div>
+
+            <!-- Auth State: Unlocked -->
+            <div id="admin-unlocked" class="hidden space-y-6">
+                
+                <div class="flex justify-between items-center glass-panel p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div>
+                        <h2 class="text-xl font-bold">Admin Dashboard</h2>
+                        <p class="text-sm text-gray-500">Manage Menu & Settings</p>
+                    </div>
+                    <button onclick="logout()" class="text-sm text-red-600 hover:text-red-800 font-medium">Log Out</button>
+                </div>
+
+                <!-- NEW: Cafe Settings (Address, Hours, Desc) -->
+                <div class="glass-panel p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-store text-nature-600"></i> Cafe Settings
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Cafe Address</label>
+                                <input type="text" id="setting-address" class="w-full p-2 border rounded text-sm bg-white" placeholder="e.g. 12 Forest Road">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Phone Number</label>
+                                <input type="text" id="setting-phone" class="w-full p-2 border rounded text-sm bg-white" placeholder="e.g. +91 987...">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Opening Hours (One line per entry)</label>
+                            <textarea id="setting-hours" class="w-full p-2 border rounded text-sm bg-white" rows="3" placeholder="Mon - Fri: 7am - 8pm"></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Hero Description (Short)</label>
+                                <input type="text" id="setting-hero-desc" class="w-full p-2 border rounded text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Footer Description (Long)</label>
+                                <textarea id="setting-footer-desc" class="w-full p-2 border rounded text-sm bg-white" rows="2"></textarea>
+                            </div>
+                        </div>
+
+                        <button onclick="saveSettings()" class="bg-nature-600 text-white px-4 py-2 rounded-lg hover:bg-nature-700 w-full md:w-auto font-bold transition-colors shadow-sm">
+                            Save Cafe Settings
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Single Item with Image Upload -->
+                <div class="glass-panel p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-plus-circle text-nature-600"></i> Add New Item
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="new-category" placeholder="Category (e.g., Tea)" class="w-full p-2 border rounded text-sm">
+                        <input type="text" id="new-name" placeholder="Item Name" class="w-full p-2 border rounded text-sm">
+                        <input type="number" id="new-price" placeholder="Price (INR)" step="1" class="w-full p-2 border rounded text-sm">
+                        <input type="text" id="new-tags" placeholder="Tags (comma separated)" class="w-full p-2 border rounded text-sm">
+                    </div>
+                    <textarea id="new-desc" placeholder="Description" class="w-full p-2 border rounded text-sm mb-4" rows="2"></textarea>
+                    
+                    <!-- Image Input -->
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Item Image (URL or Upload)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-image-url" placeholder="Paste Image URL here..." class="flex-1 p-2 border rounded text-sm">
+                            <div class="relative overflow-hidden inline-block">
+                                <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded text-sm transition-colors">
+                                    <i class="fas fa-upload mr-1"></i> Upload
+                                </button>
+                                <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleImageUpload(this)">
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-gray-500 mt-1" id="image-status">Supported: JPG, PNG, WebP (Converted to Base64 if uploaded)</p>
+                    </div>
+
+                    <button onclick="addSingleItem()" class="bg-nature-600 text-white px-4 py-2 rounded-lg hover:bg-nature-700 w-full font-bold transition-colors shadow-md">
+                        Add Item to Menu
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Batch Upload Section -->
+                    <div class="glass-panel p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <i class="fas fa-file-upload text-nature-600"></i> Batch Upload
+                        </h3>
+                        <p class="text-xs text-gray-600 mb-4">
+                            Upload a <code>.txt</code> file to replace the menu.<br>
+                            Format: <code>Category|Name|Desc|Price|Tags|ImageURL</code>
+                        </p>
+                        
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors relative">
+                            <input type="file" id="file-upload" accept=".txt" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleFileSelect(this)">
+                            <div id="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                <p class="text-sm font-medium text-gray-600">Click to upload .txt</p>
+                            </div>
+                            <div id="file-info" class="hidden">
+                                <i class="fas fa-file-alt text-nature-600 text-2xl mb-2"></i>
+                                <p id="filename-display" class="text-sm font-bold text-gray-800"></p>
+                                <button onclick="processUpload()" id="btn-process" class="mt-3 bg-nature-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-nature-700 w-full transition-all">
+                                    Update Menu
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Download Section -->
+                    <div class="glass-panel p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <i class="fas fa-file-download text-nature-600"></i> Export Menu
+                        </h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Download the current menu for backup.
+                        </p>
+                        <div class="space-y-3">
+                            <button onclick="downloadMenu('txt')" class="w-full flex justify-between items-center bg-gray-50 hover:bg-gray-100 p-3 rounded-lg border border-gray-200 transition-colors">
+                                <span class="text-sm font-medium"><i class="fas fa-file-alt mr-2 text-gray-500"></i>Text Format (.txt)</span>
+                                <i class="fas fa-download text-gray-400"></i>
+                            </button>
+                            <button onclick="downloadMenu('json')" class="w-full flex justify-between items-center bg-gray-50 hover:bg-gray-100 p-3 rounded-lg border border-gray-200 transition-colors">
+                                <span class="text-sm font-medium"><i class="fas fa-code mr-2 text-gray-500"></i>JSON Format (.json)</span>
+                                <i class="fas fa-download text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Preview / Edit Table -->
+                <div class="glass-panel rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+                        <h3 class="font-bold text-gray-700">Current Database</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50/50">
+                                <tr>
+                                    <th class="px-6 py-3">Image</th>
+                                    <th class="px-6 py-3">Category</th>
+                                    <th class="px-6 py-3">Name</th>
+                                    <th class="px-6 py-3">Price</th>
+                                    <th class="px-6 py-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-nature-950/90 text-nature-300 py-12 mt-8 relative z-10 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h4 class="text-white font-serif text-lg mb-4">Domjeeling Cafe</h4>
+                <!-- DYNAMIC ID ADDED HERE -->
+                <p id="footer-desc" class="text-sm opacity-80 leading-relaxed">Connecting you with nature through the art of food and beverage. Sustainably sourced, lovingly prepared.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-serif text-lg mb-4">Hours</h4>
+                <!-- DYNAMIC ID ADDED HERE -->
+                <ul id="footer-hours" class="text-sm space-y-2 opacity-80">
+                    <li>Mon - Fri: 7am - 8pm</li>
+                    <li>Sat - Sun: 8am - 9pm</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-serif text-lg mb-4">Contact</h4>
+                <!-- DYNAMIC ID ADDED HERE -->
+                <ul id="footer-contact" class="text-sm space-y-2 opacity-80">
+                    <li><i class="fas fa-map-marker-alt mr-2"></i> 12 Forest Road, Darjeeling</li>
+                    <li><i class="fas fa-phone mr-2"></i> +91 987 654 3210</li>
+                </ul>
+            </div>
+        </div>
+        <div class="text-center text-xs opacity-40 mt-12 border-t border-nature-800 pt-8">
+            &copy; 2026 Nature Cafe - Domjeeling. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- LOGIC -->
+    <script>
+        // --- DATA & STATE ---
+        const DEFAULT_MENU = [
+            { id: 1, category: "Tea", name: "Domjeeling First Flush", description: "Delicate floral notes with a hint of peach. Harvested in early spring.", price: 350, tags: ["Organic", "Hot"], image: "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?auto=format&fit=crop&w=500&q=80" },
+            { id: 2, category: "Tea", name: "Masala Chai", description: "Strong Assam tea brewed with cardamom, cinnamon, cloves, and ginger.", price: 150, tags: ["Spicy", "Milk"], image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=80" },
+            { id: 3, category: "Coffee", name: "Himalayan Arabica", description: "Single-origin shade-grown coffee with notes of dark chocolate.", price: 280, tags: ["Fair Trade"], image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=500&q=80" },
+            { id: 4, category: "Food", name: "Forest Mushroom Toast", description: "Sourdough topped with wild mushrooms, thyme, and goat cheese.", price: 450, tags: ["Veg"], image: "https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?auto=format&fit=crop&w=500&q=80" },
+            { id: 5, category: "Food", name: "Avocado & Sprouts", description: "Creamy avocado with micro-greens on multigrain bread.", price: 500, tags: ["Vegan"], image: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=500&q=80" },
+            { id: 6, category: "Dessert", name: "Matcha Cheesecake", description: "Raw vegan cheesecake infused with premium matcha powder.", price: 400, tags: ["GF", "Vegan"], image: "https://images.unsplash.com/photo-1509456592530-5d38e33f3fdd?auto=format&fit=crop&w=500&q=80" },
+            { id: 7, category: "Beverage", name: "Wild Berry Kombucha", description: "House-fermented sparkling tea with strawberries and hibiscus.", price: 300, tags: ["Probiotic", "Cold"], image: "https://images.unsplash.com/photo-1556742526-795a8eac090e?auto=format&fit=crop&w=500&q=80" }
+        ];
+
+        // NEW: Default Info for Editable Fields
+        const DEFAULT_INFO = {
+            heroDesc: "Organic, locally sourced ingredients from the Domjeeling valley.",
+            footerDesc: "Connecting you with nature through the art of food and beverage. Sustainably sourced, lovingly prepared.",
+            hours: "Mon - Fri: 7am - 8pm\nSat - Sun: 8am - 9pm",
+            address: "12 Forest Road, Darjeeling",
+            phone: "+91 987 654 3210"
+        };
+
+        let menuData = [];
+        let cafeInfo = {};
+        let activeCategory = 'All';
+        let isAdminAuthenticated = false;
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            loadMenu();
+            loadInfo(); // NEW: Load editable info
+            renderCategories();
+            renderMenu();
+            updateInfoUI(); // NEW: Update DOM with info
+        };
+
+        function loadMenu() {
+            const stored = localStorage.getItem('domjeelingMenu_INR');
+            if (stored) {
+                try {
+                    menuData = JSON.parse(stored);
+                } catch (e) {
+                    menuData = [...DEFAULT_MENU];
+                }
+            } else {
+                menuData = [...DEFAULT_MENU];
+            }
+        }
+
+        // NEW: Load/Save Info Logic
+        function loadInfo() {
+            const stored = localStorage.getItem('domjeelingInfo');
+            if (stored) {
+                try {
+                    cafeInfo = JSON.parse(stored);
+                } catch (e) {
+                    cafeInfo = {...DEFAULT_INFO};
+                }
+            } else {
+                cafeInfo = {...DEFAULT_INFO};
+            }
+        }
+
+        function saveSettings() {
+            const address = document.getElementById('setting-address').value;
+            const phone = document.getElementById('setting-phone').value;
+            const hours = document.getElementById('setting-hours').value;
+            const heroDesc = document.getElementById('setting-hero-desc').value;
+            const footerDesc = document.getElementById('setting-footer-desc').value;
+
+            cafeInfo = {
+                address,
+                phone,
+                hours,
+                heroDesc,
+                footerDesc
+            };
+
+            localStorage.setItem('domjeelingInfo', JSON.stringify(cafeInfo));
+            updateInfoUI();
+            showToast('Settings Saved', 'Cafe information updated successfully.');
+        }
+
+        function updateInfoUI() {
+            // Update Public DOM
+            document.getElementById('hero-desc').textContent = cafeInfo.heroDesc;
+            document.getElementById('footer-desc').textContent = cafeInfo.footerDesc;
+            
+            // Format Hours List
+            const hoursHtml = cafeInfo.hours.split('\n').map(line => `<li>${line}</li>`).join('');
+            document.getElementById('footer-hours').innerHTML = hoursHtml;
+
+            // Format Contact List
+            document.getElementById('footer-contact').innerHTML = `
+                <li><i class="fas fa-map-marker-alt mr-2"></i> ${cafeInfo.address}</li>
+                <li><i class="fas fa-phone mr-2"></i> ${cafeInfo.phone}</li>
+            `;
+
+            // Update Admin Inputs (if visible, but good to prepopulate)
+            document.getElementById('setting-address').value = cafeInfo.address;
+            document.getElementById('setting-phone').value = cafeInfo.phone;
+            document.getElementById('setting-hours').value = cafeInfo.hours;
+            document.getElementById('setting-hero-desc').value = cafeInfo.heroDesc;
+            document.getElementById('setting-footer-desc').value = cafeInfo.footerDesc;
+        }
+
+        // --- NAVIGATION ---
+        function switchTab(tabId) {
+            // Update Breadcrumb
+            document.getElementById('breadcrumb-current').textContent = tabId.charAt(0).toUpperCase() + tabId.slice(1);
+            
+            // UI Logic
+            document.querySelectorAll('button[data-tab]').forEach(btn => {
+                const isActive = btn.dataset.tab === tabId;
+                btn.className = isActive 
+                    ? "nav-btn text-nature-900 border-b-2 border-nature-600 px-1 pt-1 text-sm font-medium transition-colors"
+                    : "nav-btn text-gray-500 border-transparent hover:text-nature-700 hover:border-gray-300 px-1 pt-1 border-b-2 text-sm font-medium transition-colors";
+            });
+
+            // View Logic
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-ai').classList.add('hidden');
+            document.getElementById('view-admin').classList.add('hidden');
+
+            const activeView = document.getElementById(`view-${tabId}`);
+            activeView.classList.remove('hidden');
+            activeView.classList.add('fade-in');
+
+            if (tabId === 'admin' && isAdminAuthenticated) {
+                renderAdminTable();
+                updateInfoUI(); // Ensure admin inputs are populated
+            }
+        }
+
+        // --- MENU RENDERING ---
+        function renderCategories() {
+            const categories = ['All', ...new Set(menuData.map(item => item.category))];
+            const container = document.getElementById('category-filters');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="setCategory('${cat}')" 
+                    class="${activeCategory === cat ? 'bg-nature-600 text-white' : 'bg-white/80 text-gray-600 hover:bg-white border border-gray-200'} 
+                    whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm backdrop-blur-sm">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            renderCategories();
+            renderMenu();
+        }
+
+        function filterMenu() {
+            renderMenu();
+        }
+
+        function renderMenu() {
+            const searchTerm = document.getElementById('menu-search').value.toLowerCase();
+            const grid = document.getElementById('menu-grid');
+            
+            let filtered = menuData.filter(item => {
+                const matchesCat = activeCategory === 'All' || item.category === activeCategory;
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm) || 
+                                      item.description.toLowerCase().includes(searchTerm) ||
+                                      item.tags.some(t => t.toLowerCase().includes(searchTerm));
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400 glass-panel rounded-xl">
+                    <i class="fas fa-leaf text-4xl mb-3 opacity-30"></i><br>No items found matching your criteria.
+                </div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(item => `
+                <div class="glass-panel rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all border border-nature-100 group flex flex-col h-full">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="${item.image || 'https://via.placeholder.com/400x300?text=No+Image'}" alt="${item.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded text-xs font-bold text-nature-800 shadow-sm">
+                            ₹${item.price.toFixed(0)}
+                        </div>
+                    </div>
+                    <div class="p-5 flex-grow flex flex-col">
+                        <span class="text-[10px] font-bold tracking-wide text-nature-600 uppercase mb-1">${item.category}</span>
+                        <h3 class="font-serif text-lg font-bold text-gray-900 mb-2 group-hover:text-nature-700 transition-colors">${item.name}</h3>
+                        
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            ${item.tags.map(tag => `<span class="text-[10px] bg-gray-100/80 text-gray-600 px-1.5 py-0.5 rounded border border-gray-200">${tag}</span>`).join('')}
+                        </div>
+
+                        <div class="relative mt-auto">
+                            <p class="text-sm text-gray-600 line-clamp-2" id="desc-${item.id}">
+                                ${item.description}
+                            </p>
+                            <div id="full-desc-${item.id}" class="details-content mt-2">
+                                <p class="text-sm text-gray-600 border-t border-gray-100 pt-2">
+                                    <span class="font-semibold text-xs text-nature-800">Chef's Note:</span><br>
+                                    ${item.description} <br><br>
+                                    <span class="text-xs italic opacity-75">Sourced locally from partner farms.</span>
+                                </p>
+                            </div>
+                            <button onclick="toggleDetails(${item.id})" class="text-nature-600 text-xs font-bold mt-2 hover:underline focus:outline-none flex items-center gap-1">
+                                <span id="btn-text-${item.id}">Read Details</span> <i class="fas fa-chevron-down text-[10px]" id="icon-${item.id}"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="px-5 py-3 bg-nature-50/50 border-t border-gray-100 flex justify-between items-center">
+                        <button class="text-gray-400 hover:text-red-500 transition-colors"><i class="far fa-heart"></i></button>
+                        <button class="bg-nature-600 hover:bg-nature-700 text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition-transform active:scale-95 flex items-center gap-2" onclick="showToast('Added to cart', '${item.name} added to your order')">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleDetails(id) {
+            const content = document.getElementById(`full-desc-${id}`);
+            const btnText = document.getElementById(`btn-text-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            
+            content.classList.toggle('open');
+            
+            if (content.classList.contains('open')) {
+                btnText.textContent = "Show Less";
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                btnText.textContent = "Read Details";
+                icon.classList.add('fa-chevron-down');
+                icon.classList.remove('fa-chevron-up');
+            }
+        }
+
+        // --- ADMIN & FILE HANDLING ---
+        function checkPassword() {
+            const pass = document.getElementById('admin-password').value;
+            if (pass === 'nature20262025') {
+                isAdminAuthenticated = true;
+                document.getElementById('admin-locked').classList.add('hidden');
+                document.getElementById('admin-unlocked').classList.remove('hidden');
+                document.getElementById('admin-unlocked').classList.add('fade-in');
+                renderAdminTable();
+                updateInfoUI(); // Ensure inputs populated on unlock
+                showToast('Welcome Admin', 'Access granted successfully.');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+                setTimeout(() => document.getElementById('login-error').classList.add('hidden'), 3000);
+            }
+        }
+
+        function logout() {
+            isAdminAuthenticated = false;
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-unlocked').classList.add('hidden');
+            document.getElementById('admin-locked').classList.remove('hidden');
+        }
+
+        function handleImageUpload(input) {
+            const file = input.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    document.getElementById('new-image-url').value = reader.result;
+                    document.getElementById('image-status').textContent = `Uploaded: ${file.name} (Base64 ready)`;
+                    document.getElementById('image-status').classList.add('text-nature-600');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addSingleItem() {
+            const category = document.getElementById('new-category').value.trim();
+            const name = document.getElementById('new-name').value.trim();
+            const price = parseFloat(document.getElementById('new-price').value);
+            const desc = document.getElementById('new-desc').value.trim();
+            const tags = document.getElementById('new-tags').value.split(',').map(t => t.trim()).filter(t => t);
+            const image = document.getElementById('new-image-url').value.trim();
+
+            if(!category || !name || isNaN(price)) {
+                showToast("Error", "Please fill in Category, Name and Price", true);
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                category,
+                name,
+                description: desc,
+                price,
+                tags,
+                image: image || "https://via.placeholder.com/400x300?text=No+Image"
+            };
+
+            menuData.push(newItem);
+            localStorage.setItem('domjeelingMenu_INR', JSON.stringify(menuData));
+            
+            // Clear Form
+            document.getElementById('new-category').value = '';
+            document.getElementById('new-name').value = '';
+            document.getElementById('new-price').value = '';
+            document.getElementById('new-desc').value = '';
+            document.getElementById('new-tags').value = '';
+            document.getElementById('new-image-url').value = '';
+            document.getElementById('image-status').textContent = 'Supported: JPG, PNG, WebP (Converted to Base64 if uploaded)';
+            
+            renderAdminTable();
+            renderMenu();
+            renderCategories();
+            showToast("Success", "New item added to menu");
+        }
+
+        function handleFileSelect(input) {
+            const placeholder = document.getElementById('upload-placeholder');
+            const fileInfo = document.getElementById('file-info');
+            const filenameDisplay = document.getElementById('filename-display');
+
+            if (input.files && input.files[0]) {
+                placeholder.classList.add('hidden');
+                fileInfo.classList.remove('hidden');
+                filenameDisplay.textContent = input.files[0].name;
+            }
+        }
+
+        function processUpload() {
+            const fileInput = document.getElementById('file-upload');
+            const file = fileInput.files[0];
+            const btn = document.getElementById('btn-process');
+            
+            if (!file) return;
+
+            // Loading state
+            btn.innerHTML = `<div class="loader inline-block mr-2 border-t-white"></div> Processing...`;
+            btn.disabled = true;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                setTimeout(() => { // Artificial delay to show interaction
+                    try {
+                        const text = e.target.result;
+                        const lines = text.split('\n');
+                        const newMenu = [];
+                        let idCounter = 1;
+
+                        lines.forEach(line => {
+                            if (!line.trim()) return;
+                            // Format: Category|Name|Description|Price|Tags|ImageURL
+                            const parts = line.split('|');
+                            if (parts.length >= 4) {
+                                newMenu.push({
+                                    id: idCounter++,
+                                    category: parts[0].trim(),
+                                    name: parts[1].trim(),
+                                    description: parts[2].trim(),
+                                    price: parseFloat(parts[3].trim()),
+                                    tags: parts[4] ? parts[4].split(',').map(t => t.trim()) : [],
+                                    image: parts[5] ? parts[5].trim() : "https://via.placeholder.com/400x300?text=No+Image"
+                                });
+                            }
+                        });
+
+                        if (newMenu.length > 0) {
+                            menuData = newMenu;
+                            localStorage.setItem('domjeelingMenu_INR', JSON.stringify(menuData));
+                            renderCategories();
+                            renderMenu(); // Update public view
+                            renderAdminTable(); // Update admin view
+                            showToast('Menu Updated', `${newMenu.length} items imported successfully.`);
+                            
+                            // Reset UI
+                            document.getElementById('upload-placeholder').classList.remove('hidden');
+                            document.getElementById('file-info').classList.add('hidden');
+                            fileInput.value = '';
+                        } else {
+                            throw new Error("Invalid format");
+                        }
+                    } catch (err) {
+                        showToast('Error', 'Invalid format. Use: Category|Name|Desc|Price|Tags|Image', true);
+                    } finally {
+                        btn.innerHTML = 'Update Menu';
+                        btn.disabled = false;
+                    }
+                }, 1000);
+            };
+            reader.readAsText(file);
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = menuData.map(item => `
+                <tr class="bg-white/50 border-b hover:bg-white/80 transition-colors">
+                    <td class="px-6 py-4">
+                        <img src="${item.image}" class="w-10 h-10 rounded object-cover border border-gray-200" alt="Thumbnail">
+                    </td>
+                    <td class="px-6 py-4">${item.category}</td>
+                    <td class="px-6 py-4 font-medium text-gray-900">${item.name}</td>
+                    <td class="px-6 py-4">₹${item.price.toFixed(0)}</td>
+                    <td class="px-6 py-4">
+                        <button onclick="deleteItem(${item.id})" class="font-medium text-red-600 hover:underline">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteItem(id) {
+            if(confirm('Are you sure you want to delete this item?')) {
+                menuData = menuData.filter(i => i.id !== id);
+                localStorage.setItem('domjeelingMenu_INR', JSON.stringify(menuData));
+                renderAdminTable();
+                renderMenu();
+                showToast('Item Deleted', 'Menu item removed.');
+            }
+        }
+
+        function downloadMenu(format) {
+            let content = '';
+            let mimeType = '';
+            let extension = '';
+
+            if (format === 'json') {
+                content = JSON.stringify(menuData, null, 2);
+                mimeType = 'application/json';
+                extension = 'json';
+            } else {
+                // Text Delimited
+                content = menuData.map(i => `${i.category}|${i.name}|${i.description}|${i.price}|${i.tags.join(',')}|${i.image}`).join('\n');
+                mimeType = 'text/plain';
+                extension = 'txt';
+            }
+
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `domjeeling_menu_${new Date().toISOString().slice(0,10)}.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Download Started', `Menu exported as .${extension}`);
+        }
+
+        // --- AI PATTERNS ---
+        function aiConvertCurrency(target) {
+            // RATES FROM INR
+            const rates = { 'USD': 0.012, 'EUR': 0.011 }; 
+            const symbol = target === 'EUR' ? '€' : '$';
+            const rate = rates[target];
+            
+            const prices = document.querySelectorAll('.item-price');
+            prices.forEach(el => {
+                el.innerHTML = '<span class="loader w-3 h-3 inline-block border-nature-600"></span>';
+            });
+
+            setTimeout(() => {
+                renderMenu(); // Reset to base (INR)
+                
+                const grid = document.getElementById('menu-grid');
+                const priceDivs = grid.querySelectorAll('.absolute.top-2.right-2'); 
+                
+                priceDivs.forEach(el => {
+                   const originalPriceINR = parseFloat(el.innerText.replace(/[^0-9.]/g, ''));
+                   if(!isNaN(originalPriceINR)) {
+                       const newPrice = (originalPriceINR * rate).toFixed(2);
+                       el.innerText = `${symbol}${newPrice}`;
+                       el.classList.add('text-nature-900', 'bg-yellow-100');
+                   }
+                });
+
+                showToast('Currency Converted', `Prices approximate in ${target}`);
+            }, 600);
+        }
+
+        function aiSummarize() {
+            const output = document.getElementById('ai-summary-output');
+            const btn = document.getElementById('btn-summary');
+            
+            output.classList.remove('hidden');
+            output.innerHTML = '<div class="flex items-center gap-2"><div class="loader"></div> <span class="text-xs">Analyzing ingredients...</span></div>';
+            
+            setTimeout(() => {
+                const uniqueTags = [...new Set(menuData.flatMap(i => i.tags))].slice(0, 5).join(', ');
+                const vegCount = menuData.filter(i => i.tags.includes('Veg') || i.tags.includes('Vegan')).length;
+                
+                const summaryText = `Analysis complete. The menu leans heavily towards organic and sustainable options. 
+                Key flavor profiles include earthy notes (mushrooms, teas) and fresh botanicals. 
+                ${Math.round((vegCount/menuData.length)*100)}% of the menu is plant-forward. 
+                Top trends detected: ${uniqueTags}.`;
+
+                output.innerHTML = '';
+                typeWriter(summaryText, output);
+            }, 1500);
+        }
+
+        function typeWriter(text, element) {
+            let i = 0;
+            element.innerHTML = '';
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, 20);
+                }
+            }
+            type();
+        }
+
+        function aiSuggestPairing() {
+            const select = document.getElementById('pairing-select');
+            const result = document.getElementById('pairing-result');
+            const val = select.value;
+
+            if(!val) {
+                result.innerHTML = '<span class="opacity-50 italic">Select a drink to see AI pairing suggestions...</span>';
+                return;
+            }
+
+            result.innerHTML = '<div class="loader mx-auto"></div>';
+
+            setTimeout(() => {
+                let suggestion = "";
+                if (val === 'tea') suggestion = "Try the <strong>Matcha Cheesecake</strong>. The grassy notes of the tea complement the creamy sweetness perfectly.";
+                if (val === 'coffee') suggestion = "Pair with <strong>Forest Mushroom Toast</strong>. The earthiness of the coffee balances the umami of the mushrooms.";
+                if (val === 'smoothie') suggestion = "Best with <strong>Avocado & Sprouts</strong>. A fully refreshing, high-energy green meal.";
+
+                result.innerHTML = `<div class="fade-in"><i class="fas fa-lightbulb text-yellow-500 mb-1"></i><br>${suggestion}</div>`;
+            }, 800);
+        }
+
+        // --- UTILS ---
+        function showToast(title, message, isError = false) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-message').textContent = message;
+            
+            if(isError) {
+                toast.querySelector('i').className = 'fas fa-times-circle text-red-600 text-xl';
+                toast.querySelector('.border-l-4').classList.replace('border-nature-600', 'border-red-600');
+            } else {
+                toast.querySelector('i').className = 'fas fa-check-circle text-nature-600 text-xl';
+                toast.querySelector('.border-l-4').classList.replace('border-red-600', 'border-nature-600'); 
+            }
+
+            toast.classList.remove('translate-x-full', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
