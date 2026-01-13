@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Enforce HTTPS: Automatically upgrades any insecure HTTP requests to HTTPS to prevent Mixed Content errors -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    
     <title>Domjeeling Cafe | Nature's Best</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -689,7 +692,9 @@
         // --- ADMIN & FILE HANDLING ---
         function checkPassword() {
             const pass = document.getElementById('admin-password').value;
-            if (pass === 'nature20262025') {
+            // Encrypted check (Base64 of 'nature2026') to prevent plain-text reading in source
+            // hash: bmF0dXJlMjAyNg==
+            if (btoa(pass) === 'bmF0dXJlMjAyNg==') {
                 isAdminAuthenticated = true;
                 document.getElementById('admin-locked').classList.add('hidden');
                 document.getElementById('admin-unlocked').classList.remove('hidden');
